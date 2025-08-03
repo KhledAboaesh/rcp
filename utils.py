@@ -1,14 +1,17 @@
 import os
-from datetime import datetime
-from log import safe_print
+from PIL import Image
+import numpy as np
 
-def save_dicom(ds, save_dir="received"):
-    date_folder = datetime.now().strftime("%Y-%m-%d")
-    folder_path = os.path.join(save_dir, date_folder)
-    os.makedirs(folder_path, exist_ok=True)
+def save_pixel_data(pixel_data, uid):
+    os.makedirs("output", exist_ok=True)
+    try:
+        array = np.frombuffer(pixel_data, dtype=np.uint8)
+        size = int(np.sqrt(len(array)))
+        image = Image.fromarray(array[:size*size].reshape((size, size)))
+        image.save(f"output/{uid}.jpg")
+        print(f"✅ تم حفظ الصورة: output/{uid}.jpg")
+    except Exception as e:
+        print(f"❌ فشل حفظ الصورة: {e}")
 
-    sop_uid = ds.SOPInstanceUID
-    dicom_path = os.path.join(folder_path, f"{sop_uid}.dcm")
-    ds.save_as(dicom_path)
-    safe_print(f"💾 تم حفظ الملف: {dicom_path}")
-    return dicom_path
+def log_event(name, event):
+    print(f"[{name}] من {event.assoc.requestor.ae_title} | UID: {event.request.AffectedSOPInstanceUID}")
