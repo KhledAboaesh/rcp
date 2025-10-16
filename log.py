@@ -1,6 +1,14 @@
 # log.py
-import datetime
+# دوال بسيطة للطباعة الآمنة مع طابع زمني
 
-def safe_print(message):
-    now = datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"[{now}] {message}")
+from datetime import datetime
+import threading
+
+_lock = threading.Lock()
+
+def _now():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def safe_print(*args, **kwargs):
+    with _lock:
+        print(f"[{_now()}]", *args, **kwargs)
