@@ -20,7 +20,7 @@ from pynetdicom.sop_class import (
 # ====================================
 AE_TITLE = b'MY_PRINT_SCP'
 PORT     = 104
-OUTPUT_DIR = 'output_images'
+OUTPUT_DIR = 'output'
 
 with open('print_config.json', 'r') as fp:
     cfg = json.load(fp)
@@ -72,6 +72,12 @@ def convert_to_png(ds, uid):
         path = os.path.join(OUTPUT_DIR, f"{uid}.png")
         img.save(path)
         logging.info(f"✅ Saved image to {path}")
+        # إضافة الطباعة التلقائية بعد حفظ الصورة
+        try:
+            from printer import print_file
+            print_file(path)
+        except Exception as e:
+            logging.error(f"❌ Failed to print image: {e}")
     except Exception as e:
         logging.error(f"❌ Failed to convert image: {e}")
 
@@ -215,5 +221,5 @@ if __name__ == '__main__':
     ae.start_server(
         ('', PORT),
         block=True,
-        evt_handlers=handler
+        evt_handlers=handlers
     )
